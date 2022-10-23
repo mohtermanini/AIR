@@ -3,8 +3,14 @@
 namespace App\NLP;
 
 use Exception;
-use NlpTools\Stemmers\LancasterStemmer;
+use Wamania\Snowball\StemmerFactory;
 use Nouralhadi\Stemmer\Http\Helpers\ISRIStemmer;
+
+/*LancasterStemmer
+    use NlpTools\Stemmers\LancasterStemmer;
+    $stm = new LancasterStemmer();
+    return $stm->stemAll($text);
+*/
 
 
 
@@ -12,19 +18,18 @@ class Stemmer
 {
     public function stem($text, $lang)
     {
-        $stm = null;
+        $stemmer = null;
         if ($lang == "en") {
-            $stm = new LancasterStemmer();
-            return $stm->stemAll($text);
+            $stemmer = StemmerFactory::create('en');
         } else if ($lang == "ar") {
-            $stm = new ISRIStemmer();
-            $stemmed_text = [];
-            foreach ($text as $word) {
-                array_push($stemmed_text, $stm->stem($word));
-            }
-            return $stemmed_text;
+            $stemmer = new ISRIStemmer();
+        } else {
+            throw new Exception("Illegal Argument Exception");
         }
-
-        throw new Exception("Illegal Argument Exception");
+        $stemmed_text = [];
+        foreach ($text as $word) {
+            array_push($stemmed_text, $stemmer->stem($word));
+        }
+        return $stemmed_text;
     }
 }
