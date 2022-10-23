@@ -14,9 +14,11 @@ class Term extends Model
     public $incrementing = false;
     
     protected $fillable = ['term', 'frequency'];
+    protected $hidden = ["created_at", "updated_at"];
 
     public function documents() {
-        return $this->belongsToMany("App\Models\Document","document_term","term","document_id");
+        return $this->belongsToMany("App\Models\Document","document_term","term","document_id")
+            ->orderBy("document_id")->select("id")->withPivot("frequency");
     }
 
 }
