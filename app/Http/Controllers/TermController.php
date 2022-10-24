@@ -12,10 +12,11 @@ class TermController extends Controller
     {
         $document = Document::find($document_id);
         $frequency_array = ArraysUtils::getFrequencyArray($terms_array);
+        $max_frequency = max($frequency_array);
         $attached_data = [];
         $terms_arr = [];
         foreach ($frequency_array as $key => $value) {
-            $attached_data[$key] = ['frequency' => $value];
+            $attached_data[$key] = ["frequency" => $value, "term_frequency" => $value / $max_frequency];
             array_push($terms_arr, ["term" => $key]);
         }
         Term::insertOrIgnore($terms_arr);
