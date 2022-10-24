@@ -1,0 +1,15 @@
+.write-section {
+    margin: 2rem 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.write-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    .options {
+        align-items: center;
+    }
+}

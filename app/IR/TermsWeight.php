@@ -61,6 +61,9 @@ class TermsWeight
         foreach ($documentsId as $document_id) {
             $weights[$document_id] = [];
             foreach ($terms as $term) {
+                if (!isset($tf[$term])) {
+                    continue;
+                }
                 $weight =  (isset($tf[$term][$document_id]) ? $tf[$term][$document_id] : 0) * $idf[$term];
                 if (isset($precision)) {
                     $weight = number_format((float) $weight, $precision, '.', '') + 0;
@@ -86,10 +89,11 @@ class TermsWeight
         return $weight;
     }
 
-    public static function computeDocumentMagnitude($document_id, $idf) {
+    public static function computeDocumentMagnitude($document_id, $idf)
+    {
         $terms = Document::with("terms")->find($document_id)->terms;
         $magnitude = 0;
-        foreach($terms as $obj) {
+        foreach ($terms as $obj) {
             $term_frequency = $obj->pivot->term_frequency;
             $magnitude += ($term_frequency * $idf[$obj->term]) * ($term_frequency * $idf[$obj->term]);
         }

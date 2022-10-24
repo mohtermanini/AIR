@@ -27,11 +27,8 @@ class IRTest extends TestCase
         foreach ($documents as $document) {
             $this->post("api/document/$lang", $document);
         }
-        $response = $this->post("api/boolean-model/$lang", [
-            "queries" => ["term1 term3"],
-            "excludes" => ["term2"]
-        ]);
-        $content = $response->getContent();
+        $content = json_encode(IRController::booleanModel(["term1 term3"], ["term2"], $lang));
+        
         $true_result = json_encode(Document::whereIn("id", ["1", "4"])->get());
         $this->assertEquals($true_result, $content);
     }
@@ -41,10 +38,8 @@ class IRTest extends TestCase
         $lang = "en";
         $document = ["question" => "k1", "answer" => "k3"];
         $this->post("api/document/$lang", $document);
-        $response = $this->post("api/extended-boolean-model/$lang", [
-            "queries" => ["k1 k2 k3"]
-        ]);
-        $content = $response->getContent();
+        $content = json_encode(IRController::extendedBooleanModel(["k1 k2 k3"], [], $lang));
+
         $true_result = Document::where("id", 1)->get();
         $true_result[0]->rank = 0.423;
         $true_result = json_encode($true_result);
@@ -56,10 +51,7 @@ class IRTest extends TestCase
         $lang = "en";
         $document = ["question" => "k1", "answer" => "k3"];
         $this->post("api/document/$lang", $document);
-        $response = $this->post("api/extended-boolean-model/$lang", [
-            "queries" => ["k1 k2", "k3"]
-        ]);
-        $content = $response->getContent();
+        $content = json_encode(IRController::extendedBooleanModel(["k1 k2", "k3"], [], $lang));
         $true_result = Document::where("id", 1)->get();
         $true_result[0]->rank = 0.737;
         $true_result = json_encode($true_result);
@@ -70,10 +62,8 @@ class IRTest extends TestCase
         $lang = "en";
         $document = ["question" => "k1", "answer" => "k3"];
         $this->post("api/document/$lang", $document);
-        $response = $this->post("api/extended-boolean-model/$lang", [
-            "queries" => ["k1", "k2", "k3"]
-        ]);
-        $content = $response->getContent();
+        $content = json_encode(IRController::extendedBooleanModel(["k1", "k2", "k3"], [], $lang));
+
         $true_result = Document::where("id", 1)->get();
         $true_result[0]->rank = 0.816;
         $true_result = json_encode($true_result);
@@ -92,10 +82,11 @@ class IRTest extends TestCase
         foreach ($documents as $document) {
             $this->post("api/document/$lang", $document);
         }
-        $response = $this->post("api/extended-boolean-model/$lang", [
-            "queries" => ["hockey is a national mango cream cricket sport"]
-        ]);
-        $content = $response->getContent();
+
+        $content = json_encode(IRController::extendedBooleanModel([
+            "hockey is a national mango cream cricket sport"
+        ], [], $lang));
+
         $true_result = Document::whereIn("id", [1, 2, 3])->get();
         foreach ($true_result as $obj) {
             if ($obj->id == 1) $obj->rank = 0.184;
@@ -121,11 +112,7 @@ class IRTest extends TestCase
             $this->post("api/document/$lang", $document);
         }
         $query = "ant dog";
-        $response = $this->post("api/vector-model/$lang", [
-            "queries" => [$query]
-        ]);
-
-        $content = $response->getContent();
+        $content = json_encode(IRController::vectorModel([$query], $lang));
         $true_result = Document::whereIn("id", [1, 2, 3])->get();
         foreach ($true_result as $obj) {
             if ($obj->id == 1) $obj->rank = 0.6324555320336759;

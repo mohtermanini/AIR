@@ -1,0 +1,33 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 10px;
+}
+
+body {
+    background-color: #FBFBFB;
+    font-family: "Arial", sans-serif;
+    font-size: 1.6rem;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-weight: bold;
+}
+
+button {
+    background-color: blue;
+    border: none;
+    color: #fff;
+    padding: 0.5rem 1rem;
+}
+
+input[type=radio] {
+    
+}

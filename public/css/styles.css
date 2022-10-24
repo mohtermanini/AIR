@@ -1,0 +1,286 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 10px;
+}
+
+body {
+  background-color: #FBFBFB;
+  font-family: "Arial", sans-serif;
+  font-size: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+main {
+  flex-grow: 1;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+button {
+  background-color: blue;
+  border: none;
+  color: #fff;
+  padding: 0.5rem 1rem;
+}
+button.btn-danger {
+  background-color: #dc3545;
+}
+
+a {
+  text-decoration: none;
+}
+
+button,
+a {
+  border-radius: 0.5rem;
+  padding: 1rem 3rem;
+  display: inline-block;
+}
+button.linear-primary.active,
+a.linear-primary.active {
+  background-image: linear-gradient(0, #141A71, #232DB8);
+  color: #fff;
+}
+button.linear-primary.deactive,
+a.linear-primary.deactive {
+  border: 1px solid #232DB8;
+  color: #232DB8;
+  background-color: transparent;
+}
+button.btn-primary,
+a.btn-primary {
+  background-color: #232DB8;
+}
+button.btn-secondary,
+a.btn-secondary {
+  background-color: #09A159;
+}
+
+input {
+  padding: 1rem 2rem;
+  border: 1px solid #707070;
+  border-radius: 0.5rem;
+  font-size: 1.6rem;
+}
+
+.form-radio input[type=radio] {
+  display: none;
+}
+.form-radio label {
+  display: inline-block !important;
+  cursor: pointer;
+}
+.form-radio input[type=radio]:checked + label {
+  cursor: default;
+}
+
+textarea {
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid #707070;
+  font-size: 1.6rem;
+}
+
+section.search-options {
+  margin: 2rem 5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.search-form .search-boxes .search-box input {
+  width: 100%;
+}
+.search-form .search-boxes .added-search-box {
+  display: flex;
+  gap: 1rem;
+}
+.search-form .search-boxes .added-search-box button {
+  padding: 0.5rem 1rem;
+}
+.search-form .options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+section.search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+section.search-results .empty-results {
+  text-align: center;
+  font-weight: bold;
+  font-size: 2rem;
+}
+
+.results-bar {
+  background-color: #232DB8;
+  color: #fff;
+  padding: 2rem 5rem;
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 0 5rem;
+}
+
+.result {
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+}
+
+.result-card {
+  flex-grow: 1;
+  max-width: 700px;
+  border: 1px solid #707070;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+.result-card .card-header {
+  padding: 1.5rem 2rem;
+  background-color: #e2e2e2;
+  font-weight: bold;
+}
+.result-card .card-body {
+  padding: 1.5rem 2rem;
+}
+
+.write-section {
+  margin: 2rem 5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.write-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.write-form .options {
+  align-items: center;
+}
+
+.main-navbar .title {
+  background-color: #232DB8;
+  padding: 2rem 1rem;
+  color: #fff;
+  font-size: 3rem;
+  text-align: center;
+}
+.main-navbar .options {
+  background-color: #BFBFBF;
+  padding: 1.5rem 5rem;
+}
+.main-navbar .options ul {
+  display: flex;
+  gap: 3rem;
+}
+
+.main-footer {
+  padding: 2rem 3rem;
+  background-color: #232DB8;
+  display: flex;
+  justify-content: center;
+  color: #fff;
+  margin-top: 5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section-title {
+  font-weight: bold;
+  font-size: 2rem;
+}
+
+.alert {
+  padding: 1rem 2rem;
+  color: #fff;
+  margin: 0.5rem 5rem 0;
+  border-radius: 0.5rem;
+}
+.alert.alert-success {
+  background-color: #09A159;
+}
+.alert.alert-danger {
+  background-color: #dc3545;
+}
+
+.d-none {
+  display: none;
+}
+
+.primary-box, .primary-outline-box, .form-radio label, .form-radio input[type=radio]:checked + label {
+  background-color: #232DB8;
+  padding: 1rem 2rem;
+  color: #fff;
+  border-radius: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.primary-outline-box, .form-radio label {
+  background-color: transparent;
+  border: 1px solid #232DB8;
+  color: #232DB8;
+}
+
+.form-radio-group {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.txt-marked {
+  color: yellow;
+}
+
+.txt-green {
+  color: #09A159;
+}
+
+.txt-danger {
+  color: #dc3545;
+}
+
+/*# sourceMappingURL=styles.css.map */

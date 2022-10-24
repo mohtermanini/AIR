@@ -32,7 +32,7 @@ class DocumentController extends Controller
         $document_text = $request->question . " " . $request->answer;
         $terms_array = NLPController::getStemmedTermsFromText($document_text, $lang);
         TermController::storeTerms($terms_array, $document->id);
-        return response($document, 201);;
+        return response($document, 201);
     }
 
     /**
@@ -62,7 +62,7 @@ class DocumentController extends Controller
         $document_text = $request->question . " " . $request->answer;
         $terms_array = NLPController::getStemmedTermsFromText($document_text, $lang);
         TermController::storeTerms($terms_array, $id);
-        return response($document, 200);;
+        return response($document, 200);
     }
 
     /**
