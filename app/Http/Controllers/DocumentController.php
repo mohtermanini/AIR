@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Term;
+use App\IR\TermsWeight;
 use App\Models\Document;
 use App\Http\Requests\StoreDocumentRequest;
 
@@ -31,7 +32,7 @@ class DocumentController extends Controller
         $document_text = $request->question . " " . $request->answer;
         $terms_array = NLPController::getStemmedTermsFromText($document_text, $lang);
         TermController::storeTerms($terms_array, $document->id);
-        return response(null, 201);;
+        return response($document, 201);;
     }
 
     /**
@@ -54,14 +55,14 @@ class DocumentController extends Controller
      */
     public function update(StoreDocumentRequest $request, $id, $lang)
     {
-        $doucment = Document::find($id);
-        $doucment->update($request->all());
-        $doucment->terms()->detach();
+        $document = Document::find($id);
+        $document->update($request->all());
+        $document->terms()->detach();
         Term::doesntHave("documents")->delete();
         $document_text = $request->question . " " . $request->answer;
         $terms_array = NLPController::getStemmedTermsFromText($document_text, $lang);
         TermController::storeTerms($terms_array, $id);
-        return response(null, 200);
+        return response($document, 200);;
     }
 
     /**
