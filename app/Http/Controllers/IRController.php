@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Term;
+use App\IR\TermsWeight;
+use App\IR\VectorModel;
+use App\Models\Document;
+use App\Utils\SetsUtils;
+use App\Utils\ArraysUtils;
 use Illuminate\Http\Request;
 use App\IR\ExtendedBooleanModel;
-use App\Utils\ArraysUtils;
-use App\Utils\SetsUtils;
 
 class IRController extends Controller
 {
@@ -26,7 +29,9 @@ class IRController extends Controller
             $excludes = SetsUtils::intersectListsArray($excludes);
             $result = SetsUtils::differenceLists($result, $excludes);
         }
-        return response($result, 200);
+        $documents = Document::whereIn("id", $result)->get();
+        $documents = $documents->toArray();
+        return response($documents, 200);
     }
 
     public static function extendedBooleanModel(Request $request, $lang)
@@ -37,52 +42,55 @@ class IRController extends Controller
             $lists = ArraysUtils::getValuesOnly(IRController::getInvertedIndexFromText($query, $lang));
             $documentsVectors = [];
             for ($i = 0; $i < count($lists); $i++) {
-                foreach ($lists[$i] as $documentId) {
-                    if (!isset($documentsVectors[$documentId])) {
-                        $documentsVectors[$documentId] = array_fill(0, count($lists), 0);
+                foreach ($lists[$i] as $document_id) {
+                    if (!isset($documentsVectors[$document_id])) {
+                        $documentsVectors[$document_id] = array_fill(0, count($lists), 0);
                     }
-                    $documentsVectors[$documentId][$i] = 1;
+                    $documentsVectors[$document_id][$i] = 1;
                 }
             }
-            foreach ($documentsVectors as $documentId => $documentVector) {
-                if (!isset($documentsAndResults[$documentId])) {
-                    $documentsAndResults[$documentId] = array_fill(0, count($request->queries), 0);
+            foreach ($documentsVectors as $document_id => $documentVector) {
+                if (!isset($documentsAndResults[$document_id])) {
+                    $documentsAndResults[$document_id] = array_fill(0, count($request->queries), 0);
                 }
-                $documentsAndResults[$documentId][$q] = ExtendedBooleanModel::andQuery($documentVector);
+                $documentsAndResults[$document_id][$q] = ExtendedBooleanModel::andQuery($documentVector);
             }
         }
         $documentsOrResults = [];
-        foreach ($documentsAndResults as $documentId => $results) {
-            $documentsOrResults[$documentId] = ExtendedBooleanModel::orQuery($results);
+        foreach ($documentsAndResults as $document_id => $results) {
+            $documentsOrResults[$document_id] = ExtendedBooleanModel::orQuery($results);
         }
         $results = $documentsOrResults;
         foreach ($results as $doucmentId => $result) {
-            $results[$doucmentId] = number_format((float) $result, 3, '.', '');
+            $results[$doucmentId] = number_format((float) $result, 3, '.', '') + 0;
         }
         if (isset($request->excludes)) {
             $excludes = implode(" ", $request->excludes);
             $excludes = ArraysUtils::getValuesOnly(IRController::getInvertedIndexFromText($excludes, $lang));
             if (!empty($excludes)) {
-                foreach ($results as $documentId => $result) {
-                    $results[$documentId] = (1 - $result) * (1 - $result);
+                foreach ($results as $document_id => $result) {
+                    $results[$document_id] = (1 - $result) * (1 - $result);
                 }
                 foreach ($excludes as $documentList) {
-                    foreach ($documentList as $documentId) {
-                        $results[$documentId] += 1;
+                    foreach ($documentList as $document_id) {
+                        $results[$document_id] += 1;
                     }
                 }
-                foreach ($results as $documentId => $result) {
-                    $results[$documentId] = 1 - sqrt($result / (count($excludes) + 1));
+                foreach ($results as $document_id => $result) {
+                    $results[$document_id] = 1 - sqrt($result / (count($excludes) + 1));
                 }
             }
         }
-        uksort($results, function ($a, $b) use ($results) {
-            if ($results[$a] == $results[$b]) {
-                return $a < $b ? -1 : $a != $b;
-            }
-            return $results[$b] - $results[$a];
+        $ids = array_keys($results);
+        $documents = Document::whereIn("id", $ids)->get();
+        foreach ($documents as $document) {
+            $document->rank = $results[$document->id];
+        }
+        $documents = $documents->sortByDesc(function ($document) {
+            return $document->rank;
         });
-        return response($results, 200);
+        $documents = $documents->toArray();
+        return response($documents, 200);
     }
 
     public static function getInvertedIndexFromText($text, $lang)
@@ -99,5 +107,33 @@ class IRController extends Controller
             }
         }
         return $lists;
+    }
+
+    public static function vectorModel(Request $request, $lang)
+    {
+        $input_text = $request->queries[0];
+        $terms = NLPController::getStemmedTermsFromText($input_text, $lang);
+        $query_weights = TermsWeight::computeWeight($terms);
+        $documents_weights = TermsWeight::getStoredWeights($terms);
+        $results = [];
+        foreach ($documents_weights as $document_id => $terms_weights) {
+            $results[$document_id] = VectorModel::computeSimilarity(
+                $terms_weights,
+                $query_weights,
+                $document_id,
+                TermsWeight::getInverseDocumentFrequency()
+            );
+        }
+        $ids = array_keys($results);
+        $documents = Document::whereIn("id", $ids)->get();
+        foreach ($documents as $document) {
+            $document->rank = $results[$document->id];
+        }
+        $documents = $documents->sortByDesc(function ($document) {
+            return $document->rank;
+        });
+        $documents = $documents->toArray();
+
+        return response($documents, 200);
     }
 }
