@@ -16,7 +16,8 @@ return new class extends Migration
         Schema::create('document_term', function (Blueprint $table) {
             $table->string("term");
             $table->foreignId("document_id");
-            $table->integer("frequency")->unsigned()->default(1);
+            $table->integer("frequency")->unsigned()->nullable();
+            $table->float("term_frequency")->unsigned()->nullable();
 
             $table->foreign("term")->references("term")->on("terms")->onUpdate("cascade")->onDelete("cascade");
             $table->foreign("document_id")->references("id")->on("documents")->onUpdate("cascade")->onDelete("cascade");
