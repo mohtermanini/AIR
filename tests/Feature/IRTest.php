@@ -2,9 +2,13 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use App\IR\TermsWeight;
+use App\Models\Document;
+use App\Http\Controllers\IRController;
+use App\Http\Controllers\NLPController;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use  \Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class IRTest extends TestCase
@@ -27,9 +31,9 @@ class IRTest extends TestCase
             "queries" => ["term1 term3"],
             "excludes" => ["term2"]
         ]);
-        $content = $response->decodeResponseJson()->json();
-        $true_result = ["1", "4"];
-        $this->assertEqualsCanonicalizing($content, $true_result);
+        $content = $response->getContent();
+        $true_result = json_encode(Document::whereIn("id", ["1", "4"])->get());
+        $this->assertEquals($true_result, $content);
     }
 
     public function test_extendedBooleanModel_1()
@@ -40,10 +44,11 @@ class IRTest extends TestCase
         $response = $this->post("api/extended-boolean-model/$lang", [
             "queries" => ["k1 k2 k3"]
         ]);
-        $content = $response->decodeResponseJson()->json();
-        dd($content);
-        $true_result = ["1" => "0.423"];
-        $this->assertEquals($content, $true_result);
+        $content = $response->getContent();
+        $true_result = Document::where("id", 1)->get();
+        $true_result[0]->rank = 0.423;
+        $true_result = json_encode($true_result);
+        $this->assertEquals($true_result, $content);
     }
 
     public function test_extendedBooleanModel_2()
@@ -54,9 +59,11 @@ class IRTest extends TestCase
         $response = $this->post("api/extended-boolean-model/$lang", [
             "queries" => ["k1 k2", "k3"]
         ]);
-        $content = $response->decodeResponseJson()->json();
-        $true_result = ["1" => "0.737"];
-        $this->assertEquals($content, $true_result);
+        $content = $response->getContent();
+        $true_result = Document::where("id", 1)->get();
+        $true_result[0]->rank = 0.737;
+        $true_result = json_encode($true_result);
+        $this->assertEquals($true_result, $content);
     }
     public function test_extendedBooleanModel_3()
     {
@@ -66,9 +73,11 @@ class IRTest extends TestCase
         $response = $this->post("api/extended-boolean-model/$lang", [
             "queries" => ["k1", "k2", "k3"]
         ]);
-        $content = $response->decodeResponseJson()->json();
-        $true_result = ["1" => "0.816"];
-        $this->assertEquals($content, $true_result);
+        $content = $response->getContent();
+        $true_result = Document::where("id", 1)->get();
+        $true_result[0]->rank = 0.816;
+        $true_result = json_encode($true_result);
+        $this->assertEquals($true_result, $content);
     }
 
     public function test_extendedBooleanModel_4()
@@ -86,8 +95,47 @@ class IRTest extends TestCase
         $response = $this->post("api/extended-boolean-model/$lang", [
             "queries" => ["hockey is a national mango cream cricket sport"]
         ]);
-        $content = $response->decodeResponseJson()->json();
-        $true_result = ["2" => "0.293",   "1" => "0.184",   "3" => "0.087"];
-        $this->assertEqualsCanonicalizing($content, $true_result);
+        $content = $response->getContent();
+        $true_result = Document::whereIn("id", [1, 2, 3])->get();
+        foreach ($true_result as $obj) {
+            if ($obj->id == 1) $obj->rank = 0.184;
+            else if ($obj->id == 2) $obj->rank = 0.293;
+            else if ($obj->id == 3) $obj->rank = 0.087;
+        }
+        $true_result = $true_result->sortByDesc(function ($document) {
+            return $document->rank;
+        });
+        $true_result = json_encode($true_result);
+        $this->assertEquals($true_result, $content);
+    }
+
+    public function test_vectormodel_1()
+    {
+        $lang = "en";
+        $documents = [
+            ["question" => "ant ant", "answer" => "bee"],
+            ["question" => "dog bee dog", "answer" => "hog dog ant dog"],
+            ["question" => "cat", "answer" => "gnu dog eel fox"],
+        ];
+        foreach ($documents as $document) {
+            $this->post("api/document/$lang", $document);
+        }
+        $query = "ant dog";
+        $response = $this->post("api/vector-model/$lang", [
+            "queries" => [$query]
+        ]);
+
+        $content = $response->getContent();
+        $true_result = Document::whereIn("id", [1, 2, 3])->get();
+        foreach ($true_result as $obj) {
+            if ($obj->id == 1) $obj->rank = 0.6324555320336759;
+            else if ($obj->id == 2) $obj->rank = 0.7023268368563554;
+            else if ($obj->id == 3) $obj->rank = 0.12831948188497178;
+        }
+        $true_result = $true_result->sortByDesc(function ($document) {
+            return $document->rank;
+        });
+        $true_result = json_encode($true_result);
+        $this->assertEquals($true_result, $content);
     }
 }
